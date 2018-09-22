@@ -26,8 +26,7 @@ for i = 1:N
     Ynew = rollrot(roll(i));
     Znew = yawrot(yaw(i));
     
-    g_new =  Ynew* Xnew * Znew * gravity; 
-    
+    g_new =  Ynew'* Xnew' * Znew' * gravity; 
     
     g_rot = [g_rot g_new];
 end
@@ -125,14 +124,14 @@ ylabel("Amplitude");
 title("Accel z")
 
 
-function res = pitchrot(alpha) % pitch
+function res = pitchrot(alpha) % pitch rotate wtr x
     res = [1 0 0; 0 cosd(alpha) sind(alpha); 0 -sind(alpha) cosd(alpha)];
 end 
 
-function res = rollrot(beta) % roll
+function res = rollrot(beta) % roll rotate wtr y
     res = [cosd(beta) 0 sind(beta); 0 1 0; -sind(beta) 0 cosd(beta)];
 end
 
-function res = yawrot(theta) % yaw
+function res = yawrot(theta) % yaw rotate wtr z
     res = [cosd(theta) -sind(theta) 0; sind(theta) cosd(theta) 0; 0 0 1];
 end

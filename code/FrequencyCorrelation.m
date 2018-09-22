@@ -1,4 +1,4 @@
-fs = 100; % 10Hz
+fs = 100; % 100Hz
 
 % convert timetable to array and extract data
 acceleration_table = timetable2table(Acceleration);
@@ -27,9 +27,7 @@ for i = 1:N
     Ynew = rollrot(roll(i));
     Znew = yawrot(yaw(i));
     
-    g_new =  Ynew* Xnew * Znew * gravity; 
-    
-    
+    g_new =  Ynew'* Xnew' * Znew' * gravity; 
     g_rot = [g_rot g_new];
 end
 
@@ -337,8 +335,6 @@ title("Pitch band pass")
 subplot(3,3,9)
 plot(roll_bp)
 title("Roll band pass")
-
-
 
 function res = pitchrot(alpha) % pitch
     res = [1 0 0; 0 cosd(alpha) sind(alpha); 0 -sind(alpha) cosd(alpha)];
