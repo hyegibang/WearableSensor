@@ -40,43 +40,63 @@ accel_z = accel_phone_filtered(:,3);
 figure
 subplot(3,2,1)
 plot(accel_x)
+ylim([-20 40])
 title("Accel X Gravity Filtered")
 subplot(3,2,3)
 plot(accel_y)
+ylim([-20 40])
 title("Accel Y Gravity Filtered")
 subplot(3,2,5)
 plot(accel_z)
+ylim([-20 40])
 title("Accel Z Gravity Filtered")
 subplot(3,2,2)
 plot(accel_phone(:,1))
+ylim([-20 40])
 title("Accel X Raw Data")
 subplot(3,2,4)
 plot(accel_phone(:,2))
+ylim([-20 40])
 title("Accel Y Raw Data")
 subplot(3,2,6)
 plot(accel_phone(:,3))
+ylim([-20 40])
 title("Accel Z Raw Data")
 
 % plot acceleration gyro data time domain
 figure
 subplot(3,2,1)
 plot(gyro_x)
+ylim([-5 5])
 title("Gyro x")
 subplot(3,2,3)
 plot(gyro_y)
+ylim([-5 5])
 title("Gyro y")
 subplot(3,2,5)
 plot(gyro_z)
+ylim([-5 5])
 title("Gyro z")
 subplot(3,2,2)
 plot(accel_x)
+ylim([-20 40])
 title("Acceleration x")
 subplot(3,2,4)
 plot(accel_y)
+ylim([-20 40])
 title("Acceleration y")
 subplot(3,2,6)
 plot(accel_z)
+ylim([-20 40])
 title("Acceleration z")
+
+% subtract mean
+accel_x = accel_x - mean(accel_x);
+accel_y = accel_y - mean(accel_y);
+accel_z = accel_z - mean(accel_z);
+gyro_x = gyro_x - mean(gyro_x);
+gyro_y = gyro_y - mean(gyro_y);
+gyro_z = gyro_z - mean(gyro_z);
 
 % fft raw data
 N_accel = length(accel_x);
@@ -96,16 +116,19 @@ Z_gyro = fft(gyro_z);
 figure
 subplot(3,1,1);
 plot(f_accel, fftshift(abs(X_accel)));
+ylim([0 5000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel x")
 subplot(3,1,2);
 plot(f_accel, fftshift(abs(Y_accel)));
+ylim([0 5000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel y")
 subplot(3,1,3);
 plot(f_accel, fftshift(abs(Z_accel)));
+ylim([0 5000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel z")
@@ -114,16 +137,19 @@ title("Accel z")
 figure
 subplot(3,1,1);
 plot(f_gyro, fftshift(abs(X_gyro)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro x")
 subplot(3,1,2);
 plot(f_gyro, fftshift(abs(Y_gyro)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro y")
 subplot(3,1,3);
 plot(f_gyro, fftshift(abs(Z_gyro)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro z")
@@ -150,9 +176,13 @@ title("Phone Y axis i")
 [Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
 majorfreq_Z_gyro = abs(f_gyro(Z_gyro_I(5)));
 majorfreq_Z_gyro_mag = Z_gyro_sorted(5);
+Z_gyro_phase = fftshift(angle(Z_gyro));
+majorfreq_Z_gyro_phase = Z_gyro_phase(Z_gyro_I(1));
 [phone_Y_sorted, phone_Y_I] = sort(fftshift(abs(phone_Y(:,1))),'descend');
 maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
 maxfreq_phone_Y_mag = phone_Y_sorted(1);
+phone_Y_phase = fftshift(angle(phone_Y(:,1)));
+maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
 
 % bandpass 
 lower_offset = 0.01;
@@ -176,16 +206,19 @@ Z_gyro_bp = fft(gyro_z_bp);
 figure
 subplot(3,1,1);
 plot(f_accel, fftshift(abs(X_accel_bp)));
+ylim([0 3000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel x filtered")
 subplot(3,1,2);
 plot(f_accel, fftshift(abs(Y_accel_bp)));
+ylim([0 3000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel y filtered")
 subplot(3,1,3);
 plot(f_accel, fftshift(abs(Z_accel_bp)));
+ylim([0 3000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Accel z filtered")
@@ -194,16 +227,19 @@ title("Accel z filtered")
 figure
 subplot(3,1,1);
 plot(f_gyro, fftshift(abs(X_gyro_bp)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro x filtered")
 subplot(3,1,2);
 plot(f_gyro, fftshift(abs(Y_gyro_bp)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro y filtered")
 subplot(3,1,3);
 plot(f_gyro, fftshift(abs(Z_gyro_bp)));
+ylim([0 1000])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro z filtered")
@@ -212,21 +248,27 @@ title("Gyro z filtered")
 figure
 subplot(3,2,1)
 plot(gyro_x_bp)
+ylim([-1 1])
 title("Gyro x filtered")
 subplot(3,2,3)
 plot(gyro_y_bp)
+ylim([-1 1])
 title("Gyro y filtered")
 subplot(3,2,5)
 plot(gyro_z_bp)
+ylim([-1 1])
 title("Gyro z filtered")
 subplot(3,2,2)
 plot(accel_x_bp)
+ylim([-5 5])
 title("Acceleration x filtered")
 subplot(3,2,4)
 plot(accel_y_bp)
+ylim([-5 5])
 title("Acceleration y filtered")
 subplot(3,2,6)
 plot(accel_z_bp)
+ylim([-5 5])
 title("Acceleration z filtered")
 
 % change accelerometer data to world coordinate frame

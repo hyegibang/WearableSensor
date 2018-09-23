@@ -15,27 +15,6 @@ yaw = orientation(:,1);
 pitch = orientation(:,2);
 roll = orientation(:,3);
 
-% plot acceleration gyro data time domain
-figure
-subplot(3,2,1)
-plot(gyro_x)
-title("Gyro x")
-subplot(3,2,3)
-plot(gyro_y)
-title("Gyro y")
-subplot(3,2,5)
-plot(gyro_z)
-title("Gyro z")
-subplot(3,2,2)
-plot(accel_x)
-title("Acceleration x")
-subplot(3,2,4)
-plot(accel_y)
-title("Acceleration y")
-subplot(3,2,6)
-plot(accel_z)
-title("Acceleration z")
-
 % extract gravity component
 gravity = [0;0;9.8];
 N = length(orientation);
@@ -77,6 +56,35 @@ title("Accel Y Raw Data")
 subplot(3,2,6)
 plot(accel_phone(:,3))
 title("Accel Z Raw Data")
+
+% plot acceleration gyro data time domain
+figure
+subplot(3,2,1)
+plot(gyro_x)
+title("Gyro x")
+subplot(3,2,3)
+plot(gyro_y)
+title("Gyro y")
+subplot(3,2,5)
+plot(gyro_z)
+title("Gyro z")
+subplot(3,2,2)
+plot(accel_x)
+title("Acceleration x")
+subplot(3,2,4)
+plot(accel_y)
+title("Acceleration y")
+subplot(3,2,6)
+plot(accel_z)
+title("Acceleration z")
+
+% subtract mean
+accel_x = accel_x - mean(accel_x);
+accel_y = accel_y - mean(accel_y);
+accel_z = accel_z - mean(accel_z);
+gyro_x = gyro_x - mean(gyro_x);
+gyro_y = gyro_y - mean(gyro_y);
+gyro_z = gyro_z - mean(gyro_z);
 
 % fft raw data
 N_accel = length(accel_x);
@@ -141,28 +149,34 @@ N_orien = length(yaw);
 f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
 % plot orientation frequency domain y axis
 figure
-plot(f_orien, fftshift(abs(phone_Y(:,1))));
+plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Phone Y axis i")
 
 % identify peak frequency 
-% accel
-[Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
-majorfreq_Z_gyro = abs(f_gyro(Z_gyro_I(5)));
-majorfreq_Z_gyro_mag = Z_gyro_sorted(5);
-[phone_Y_sorted, phone_Y_I] = sort(fftshift(abs(phone_Y)),'descend');
-maxfreq_phone
+[X_gyro_sorted,X_gyro_I] = sort(fftshift(abs(X_gyro)),'descend');
+majorfreq_X_gyro = abs(f_gyro(X_gyro_I(7))); % stop
+majorfreq_X_gyro_mag = X_gyro_sorted(7); % stop
+% majorfreq_X_gyro = abs(f_gyro(X_gyro_I(5))); % right
+% majorfreq_X_gyro_mag = X_gyro_sorted(5); % right
+X_gyro_phase = fftshift(angle(X_gyro));
+majorfreq_X_gyro_phase = X_gyro_phase(X_gyro_I(1));
+[phone_Y_sorted, phone_Y_I] = sort(fftshift(abs(phone_Y(:,1))),'descend');
+maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
+maxfreq_phone_Y_mag = phone_Y_sorted(1);
+phone_Y_phase = fftshift(angle(phone_Y(:,1)));
+maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
 
 % bandpass 
 lower_offset = 0.01;
 higher_offset = 0.12;
-accel_x_bp = bandpass(accel_x,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
-accel_y_bp = bandpass(accel_y,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
-accel_z_bp = bandpass(accel_z,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
-gyro_x_bp = bandpass(gyro_x,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
-gyro_y_bp = bandpass(gyro_y,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
-gyro_z_bp = bandpass(gyro_z,[majorfreq_Z_gyro - lower_offset, majorfreq_Z_gyro + higher_offset],fs);
+accel_x_bp = bandpass(accel_x,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
+accel_y_bp = bandpass(accel_y,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
+accel_z_bp = bandpass(accel_z,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
+gyro_x_bp = bandpass(gyro_x,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
+gyro_y_bp = bandpass(gyro_y,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
+gyro_z_bp = bandpass(gyro_z,[majorfreq_X_gyro - lower_offset, majorfreq_X_gyro + higher_offset],fs);
 
 % fft filtered data
 X_accel_bp = fft(accel_x_bp);
