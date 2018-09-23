@@ -40,42 +40,54 @@ accel_z = accel_phone_filtered(:,3);
 figure
 subplot(3,2,1)
 plot(accel_x)
+ylim([-20 20])
 title("Accel X Gravity Filtered")
 subplot(3,2,3)
 plot(accel_y)
+ylim([-20 20])
 title("Accel Y Gravity Filtered")
 subplot(3,2,5)
 plot(accel_z)
+ylim([-20 20])
 title("Accel Z Gravity Filtered")
 subplot(3,2,2)
 plot(accel_phone(:,1))
+ylim([-20 20])
 title("Accel X Raw Data")
 subplot(3,2,4)
 plot(accel_phone(:,2))
+ylim([-20 20])
 title("Accel Y Raw Data")
 subplot(3,2,6)
 plot(accel_phone(:,3))
+ylim([-20 20])
 title("Accel Z Raw Data")
 
 % plot acceleration gyro data time domain
 figure
 subplot(3,2,1)
 plot(gyro_x)
+ylim([-5 5])
 title("Gyro x")
 subplot(3,2,3)
 plot(gyro_y)
+ylim([-5 5])
 title("Gyro y")
 subplot(3,2,5)
 plot(gyro_z)
+ylim([-5 5])
 title("Gyro z")
 subplot(3,2,2)
 plot(accel_x)
+ylim([-20 20])
 title("Acceleration x")
 subplot(3,2,4)
 plot(accel_y)
+ylim([-20 20])
 title("Acceleration y")
 subplot(3,2,6)
 plot(accel_z)
+ylim([-20 20])
 title("Acceleration z")
 
 % subtract mean
@@ -100,42 +112,6 @@ X_gyro = fft(gyro_x);
 Y_gyro = fft(gyro_y);
 Z_gyro = fft(gyro_z);
 
-% plot accel frequency domain
-figure
-subplot(3,1,1);
-plot(f_accel, fftshift(abs(X_accel)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel x")
-subplot(3,1,2);
-plot(f_accel, fftshift(abs(Y_accel)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel y")
-subplot(3,1,3);
-plot(f_accel, fftshift(abs(Z_accel)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel z")
-
-% plot gyro frequency domain
-figure
-subplot(3,1,1);
-plot(f_gyro, fftshift(abs(X_gyro)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro x")
-subplot(3,1,2);
-plot(f_gyro, fftshift(abs(Y_gyro)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro y")
-subplot(3,1,3);
-plot(f_gyro, fftshift(abs(Z_gyro)));
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro z")
-
 % Analyze Orientation Data (y axis only)
 world_y = [0,1,0];
 % change world axis to phone axis
@@ -147,12 +123,6 @@ phone_y = phone_y - mean(phone_y);
 phone_Y = fftn(phone_y);
 N_orien = length(yaw);
 f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
-% plot orientation frequency domain y axis
-figure
-plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Phone Y axis i")
 
 % identify peak frequency 
 % accel
@@ -184,6 +154,88 @@ maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
 maxfreq_phone_Y_mag = phone_Y_sorted(1);
 phone_Y_phase = fftshift(angle(phone_Y(:,1)));
 maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
+
+% plot orientation frequency domain y axis
+figure
+plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_orien,phone_Y);
+hold off
+xlim([-15 15])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Projection of World Y Axis in Phone (i component)")
+
+% plot accel frequency domain
+figure
+subplot(3,1,1);
+plot(f_accel, fftshift(abs(X_accel)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_accel,X_accel);
+hold off
+xlim([-15 15])
+ylim([0 12000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel x")
+
+subplot(3,1,2);
+plot(f_accel, fftshift(abs(Y_accel)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_accel,Y_accel);
+hold off
+xlim([-15 15])
+ylim([0 12000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel y")
+
+subplot(3,1,3);
+plot(f_accel, fftshift(abs(Z_accel)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_accel,Z_accel);
+hold off
+xlim([-15 15])
+ylim([0 12000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel z")
+
+% plot gyro frequency domain
+figure
+subplot(3,1,1);
+plot(f_gyro, fftshift(abs(X_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_gyro,X_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1500])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro x")
+
+subplot(3,1,2);
+plot(f_gyro, fftshift(abs(Y_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_gyro,Y_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1500])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro y")
+
+subplot(3,1,3);
+plot(f_gyro, fftshift(abs(Z_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_gyro,Z_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1500])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro z")
+
 
 % bandpass first way
 lower_offset1 = 0.01; % waving
@@ -266,21 +318,27 @@ title("Gyro z filtered")
 figure
 subplot(3,2,1)
 plot(gyro_x_bp)
+ylim([-0.5 0.5])
 title("Gyro x filtered")
 subplot(3,2,3)
 plot(gyro_y_bp)
+ylim([-0.5 0.5])
 title("Gyro y filtered")
 subplot(3,2,5)
 plot(gyro_z_bp)
+ylim([-0.5 0.5])
 title("Gyro z filtered")
 subplot(3,2,2)
 plot(accel_x_bp)
+ylim([-5 5])
 title("Acceleration x filtered")
 subplot(3,2,4)
 plot(accel_y_bp)
+ylim([-5 5])
 title("Acceleration y filtered")
 subplot(3,2,6)
 plot(accel_z_bp)
+ylim([-5 5])
 title("Acceleration z filtered")
 
 % change accelerometer data to world coordinate frame
@@ -315,7 +373,7 @@ end
 % plot position
 figure
 plot(position_world(:,1),position_world(:,2),'b')
-title("Position of Biker Over Time")
+title("Position of Biker")
 xlabel("x(m)")
 ylabel("y(m)")
 
@@ -341,4 +399,19 @@ function res = rpy_world2local(n, v,orientation)
         axis = [axis; transpose(new_axis)]; 
     end
     res = axis;
+end
+function res = PlotMajorFrequency(freq1, freq2, freqdata, data)
+    idx1 = freqdata == freq1;
+    idx2 = freqdata == freq2;
+    value_x = [round(-freq1,3); round(freq1,3); round(-freq2,3); round(freq2,3)];
+    shifted = fftshift(abs(data));
+    value_y = [round(shifted(idx1),3);round(shifted(idx1),3);round(shifted(idx2),3);round(shifted(idx2),3)];
+    plot(value_x,value_y,'r.', 'MarkerSize', 20)
+    h = [];
+    for k=1:numel(value_x)
+        h1 = plot(value_x(k),value_y(k),'r.', 'MarkerSize', 20,'DisplayName', ['(' num2str(value_x(k)) ', ' num2str(value_y(k)) ')']);
+        h = [h,h1];
+    end
+    res = h;
+    legend(h)
 end

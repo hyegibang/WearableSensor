@@ -122,17 +122,6 @@ phone_y = phone_y - mean(phone_y);
 phone_Y = fftn(phone_y);
 N_orien = length(yaw);
 f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
-% plot orientation frequency domain y axis
-figure
-hold on
-plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
-PlotMajorFrequency(maxfreq_phone_Y, f_orien,phone_Y(:,1));
-hold off
-xlim([-15 15])
-ylim([0 800])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Projection of World Y Axis in Phone (i component)")
 
 % identify peak frequency 
 [Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
@@ -145,6 +134,18 @@ maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
 maxfreq_phone_Y_mag = phone_Y_sorted(1);
 phone_Y_phase = fftshift(angle(phone_Y(:,1)));
 maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
+
+% plot orientation frequency domain y axis
+figure
+hold on
+plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
+PlotMajorFrequency(maxfreq_phone_Y, f_orien,phone_Y(:,1));
+hold off
+xlim([-15 15])
+ylim([0 800])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Projection of World Y Axis in Phone (i component)")
 
 % plot accel frequency domain
 figure
