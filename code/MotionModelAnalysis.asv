@@ -72,7 +72,7 @@ Y_gyro = fft(gyro_y);
 Z_gyro = fft(gyro_z);
 
 % identify peak frequency 
-
+% accel
 [Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
 maxfreq_Z_gyro = abs(f_gyro(Z_gyro_I(12)));
 maxfreq_Z_gyro_mag = Z_gyro_sorted(12);
@@ -135,15 +135,15 @@ subplot(3,2,6)
 plot(accel_z)
 title("Acceleration z")
 
-% bandpass 
-lower_offset = 0.01;
-higher_offset = 0.01;
-accel_x_bp = bandpass(accel_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-accel_y_bp = bandpass(accel_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-accel_z_bp = bandpass(accel_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_x_bp = bandpass(gyro_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_y_bp = bandpass(gyro_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_z_bp = bandpass(gyro_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % bandpass 
+% % lower_offset = 0.01;
+% % higher_offset = 1.5;
+% % accel_x_bp = bandpass(accel_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % accel_y_bp = bandpass(accel_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % accel_z_bp = bandpass(accel_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % gyro_x_bp = bandpass(gyro_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % gyro_y_bp = bandpass(gyro_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% % gyro_z_bp = bandpass(gyro_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
 
 % % lowpass
 % accel_x_bp = lowpass(accel_x, maxfreq_Z_gyro,fs);

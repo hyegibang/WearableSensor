@@ -218,7 +218,6 @@ subplot(3,3,9)
 plot(roll)
 title("Roll")
 
-
 % bandpass first way
 offset = 0.12;
 accel_x_bp1 = bandpass(accel_x,[maxfreq_Z_gyro - offset, maxfreq_Z_gyro + offset],fs);

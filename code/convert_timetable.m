@@ -1,0 +1,1 @@
+convertedData = [seconds(Acceleration.Timestamp - Acceleration.Timestamp(1)) Acceleration.Variables]

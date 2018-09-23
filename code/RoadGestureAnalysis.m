@@ -57,6 +57,35 @@ subplot(3,2,6)
 plot(accel_phone(:,3))
 title("Accel Z Raw Data")
 
+% plot acceleration gyro data time domain
+figure
+subplot(3,2,1)
+plot(gyro_x)
+title("Gyro x")
+subplot(3,2,3)
+plot(gyro_y)
+title("Gyro y")
+subplot(3,2,5)
+plot(gyro_z)
+title("Gyro z")
+subplot(3,2,2)
+plot(accel_x)
+title("Acceleration x")
+subplot(3,2,4)
+plot(accel_y)
+title("Acceleration y")
+subplot(3,2,6)
+plot(accel_z)
+title("Acceleration z")
+
+% subtract mean
+accel_x = accel_x - mean(accel_x);
+accel_y = accel_y - mean(accel_y);
+accel_z = accel_z - mean(accel_z);
+gyro_x = gyro_x - mean(gyro_x);
+gyro_y = gyro_y - mean(gyro_y);
+gyro_z = gyro_z - mean(gyro_z);
+
 % fft raw data
 N_accel = length(accel_x);
 N_gyro = length(gyro_x);
@@ -70,12 +99,6 @@ Z_accel = fft(accel_z);
 X_gyro = fft(gyro_x);
 Y_gyro = fft(gyro_y);
 Z_gyro = fft(gyro_z);
-
-% identify peak frequency 
-
-[Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
-maxfreq_Z_gyro = abs(f_gyro(Z_gyro_I(12)));
-maxfreq_Z_gyro_mag = Z_gyro_sorted(12);
 
 % plot accel frequency domain
 figure
@@ -113,54 +136,87 @@ xlabel("Frequency(Hz)");
 ylabel("Amplitude");
 title("Gyro z")
 
-
-% plot acceleration gyro data time domain
+% Analyze Orientation Data (y axis only)
+world_y = [0,1,0];
+% change world axis to phone axis
+N = length(orientation);
+phone_y = rpy_world2local(N,world_y,orientation);
+% subtract mean
+phone_y = phone_y - mean(phone_y);
+% fft on phone axis
+phone_Y = fftn(phone_y);
+N_orien = length(yaw);
+f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
+% plot orientation frequency domain y axis
 figure
-subplot(3,2,1)
-plot(gyro_x)
-title("Gyro x")
-subplot(3,2,3)
-plot(gyro_y)
-title("Gyro y")
-subplot(3,2,5)
-plot(gyro_z)
-title("Gyro z")
-subplot(3,2,2)
-plot(accel_x)
-title("Acceleration x")
-subplot(3,2,4)
-plot(accel_y)
-title("Acceleration y")
-subplot(3,2,6)
-plot(accel_z)
-title("Acceleration z")
+plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Phone Y axis i")
 
-% bandpass 
-lower_offset = 0.01;
-higher_offset = 0.01;
-accel_x_bp = bandpass(accel_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-accel_y_bp = bandpass(accel_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-accel_z_bp = bandpass(accel_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_x_bp = bandpass(gyro_x,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_y_bp = bandpass(gyro_y,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
-gyro_z_bp = bandpass(gyro_z,[maxfreq_Z_gyro - lower_offset, maxfreq_Z_gyro + higher_offset],fs);
+% identify peak frequency 
+% accel
+[X_accel_sorted,X_accel_I] = sort(fftshift(abs(X_accel)),'descend');
+majorfreq_X_accel = abs(f_accel(X_accel_I(1)));
+majorfreq_X_accel_mag = X_accel_sorted(1);
+X_accel_phase = fftshift(angle(X_accel));
+majorfreq_X_accel_phase = X_accel_phase(X_accel_I(1));
+[Y_accel_sorted,Y_accel_I] = sort(fftshift(abs(Y_accel)),'descend');
+majorfreq_Y_accel = abs(f_accel(Y_accel_I(1)));
+majorfreq_Y_accel_mag = Y_accel_sorted(1);
+Y_accel_phase = fftshift(angle(Y_accel));
+majorfreq_Y_accel_phase = Y_accel_phase(Y_accel_I(1));
 
-% % lowpass
-% accel_x_bp = lowpass(accel_x, maxfreq_Z_gyro,fs);
-% accel_y_bp = lowpass(accel_y,maxfreq_Z_gyro,fs);
-% accel_z_bp = lowpass(accel_z,maxfreq_Z_gyro,fs);
-% gyro_x_bp = lowpass(gyro_x,maxfreq_Z_gyro,fs);
-% gyro_y_bp = lowpass(gyro_y,maxfreq_Z_gyro,fs);
-% gyro_z_bp = lowpass(gyro_z,maxfreq_Z_gyro,fs);
+% gyro
+[X_gyro_sorted,X_gyro_I] = sort(fftshift(abs(X_gyro)),'descend');
+majorfreq_X_gyro = abs(f_gyro(X_gyro_I(1)));
+majorfreq_X_gyro_mag = X_gyro_sorted(1);
+X_gyro_phase = fftshift(angle(X_gyro));
+majorfreq_X_gyro_phase = X_gyro_phase(X_gyro_I(1));
+[Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
+majorfreq_Z_gyro = abs(f_gyro(Z_gyro_I(1)));
+maajorfreq_Z_gyro_mag = Z_gyro_sorted(1);
+Z_gyro_phase = fftshift(angle(Z_gyro));
+majorfreq_Z_gyro_phase = Z_gyro_phase(Z_gyro_I(1));
+% orientation
+[phone_Y_sorted, phone_Y_I] = sort(fftshift(abs(phone_Y(:,1))),'descend');
+maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
+maxfreq_phone_Y_mag = phone_Y_sorted(1);
+phone_Y_phase = fftshift(angle(phone_Y(:,1)));
+maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
 
-% % highpass
-% accel_x_bp = highpass(accel_x, maxfreq_Z_gyro,fs);
-% accel_y_bp = highpass(accel_y,maxfreq_Z_gyro,fs);
-% accel_z_bp = highpass(accel_z,maxfreq_Z_gyro,fs);
-% gyro_x_bp = highpass(gyro_x,maxfreq_Z_gyro,fs);
-% gyro_y_bp = highpass(gyro_y,maxfreq_Z_gyro,fs);
-% gyro_z_bp = highpass(gyro_z,maxfreq_Z_gyro,fs);
-
+% bandpass first way
+lower_offset1 = 0.01; % waving
+higher_offset1 = 0.01;
+lower_offset2 = 0.01; % repetitive motion
+higher_offset2 = 0.12;
+accel_x_bp1 = bandpass(accel_x,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+accel_x_bp2 = bandpass(accel_x,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+accel_x_bp = accel_x_bp1 + accel_x_bp2;
+accel_y_bp1 = bandpass(accel_y,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+accel_y_bp2 = bandpass(accel_y,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+accel_y_bp = accel_y_bp1 + accel_y_bp2;
+accel_z_bp1 = bandpass(accel_z,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+accel_z_bp2 = bandpass(accel_z,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+accel_z_bp = accel_z_bp1 + accel_z_bp2;
+gyro_x_bp1 = bandpass(gyro_x,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+gyro_x_bp2 = bandpass(gyro_x,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+gyro_x_bp = gyro_x_bp1 + gyro_x_bp2;
+gyro_y_bp1 = bandpass(gyro_y,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+gyro_y_bp2 = bandpass(gyro_y,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+gyro_y_bp = gyro_y_bp1 + gyro_y_bp2;
+gyro_z_bp1 = bandpass(gyro_z,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+gyro_z_bp2 = bandpass(gyro_z,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+gyro_z_bp = gyro_z_bp1 + gyro_z_bp2;
+yaw_bp1 = bandpass(yaw,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+yaw_bp2 = bandpass(yaw,[maxfreq_phone_Y - lower_offset2,maxfreq_phone_Y + higher_offset2],fs);
+yaw_bp = yaw_bp1 + yaw_bp2;
+pitch_bp1 = bandpass(pitch,[majorfreq_Z_gyro - lower_offset1,majorfreq_Z_gyro + higher_offset1],fs);
+pitch_bp2 = bandpass(pitch,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+pitch_bp = pitch_bp1 + pitch_bp2;
+roll_bp1 = bandpass(roll,[majorfreq_Z_gyro - lower_offset1, majorfreq_Z_gyro + higher_offset1],fs);
+roll_bp2 = bandpass(roll,[maxfreq_phone_Y - lower_offset2, maxfreq_phone_Y + higher_offset2],fs);
+roll_bp = roll_bp1 + roll_bp2;
 
 % fft filtered data
 X_accel_bp = fft(accel_x_bp);
@@ -274,4 +330,15 @@ end
 
 function res = yawrot(theta) % yaw
     res = [cosd(theta) -sind(theta) 0; sind(theta) cosd(theta) 0; 0 0 1];
+end
+function res = rpy_world2local(n, v,orientation)
+    axis = [];
+    for i = 1:n
+        YawMat = yawrot(orientation(i,1));
+        PitchMat = pitchrot(orientation(i,2));
+        RollMat = rollrot(orientation(i,3));
+        new_axis =  RollMat'*PitchMat'*YawMat'*transpose(v); 
+        axis = [axis; transpose(new_axis)]; 
+    end
+    res = axis;
 end
