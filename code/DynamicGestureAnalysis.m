@@ -159,7 +159,7 @@ maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
 figure
 plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
 hold on
-PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_orien,phone_Y);
+PlotMajorFrequency(maxfreq_phone_Y, majorfreq_Z_gyro, f_orien,phone_Y(:,1));
 hold off
 xlim([-15 15])
 xlabel("Frequency(Hz)");
