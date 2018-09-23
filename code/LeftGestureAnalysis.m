@@ -104,55 +104,12 @@ N_gyro = length(gyro_x);
 N_orien = length(yaw);
 f_accel = linspace(-fs/2, fs/2 - fs/N_accel, N_accel) + fs/(2*N_accel)*mod(N_accel, 2);
 f_gyro = linspace(-fs/2, fs/2 - fs/N_gyro, N_gyro) + fs/(2*N_gyro)*mod(N_gyro, 2);
-f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
 X_accel = fft(accel_x);
 Y_accel = fft(accel_y);
 Z_accel = fft(accel_z);
 X_gyro = fft(gyro_x);
 Y_gyro = fft(gyro_y);
 Z_gyro = fft(gyro_z);
-
-% plot accel frequency domain
-figure
-subplot(3,1,1);
-plot(f_accel, fftshift(abs(X_accel)));
-ylim([0 5000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel x")
-subplot(3,1,2);
-plot(f_accel, fftshift(abs(Y_accel)));
-ylim([0 5000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel y")
-subplot(3,1,3);
-plot(f_accel, fftshift(abs(Z_accel)));
-ylim([0 5000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Accel z")
-
-% plot gyro frequency domain
-figure
-subplot(3,1,1);
-plot(f_gyro, fftshift(abs(X_gyro)));
-ylim([0 1000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro x")
-subplot(3,1,2);
-plot(f_gyro, fftshift(abs(Y_gyro)));
-ylim([0 1000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro y")
-subplot(3,1,3);
-plot(f_gyro, fftshift(abs(Z_gyro)));
-ylim([0 1000])
-xlabel("Frequency(Hz)");
-ylabel("Amplitude");
-title("Gyro z")
 
 % Analyze Orientation Data (y axis only)
 world_y = [0,1,0];
@@ -167,10 +124,15 @@ N_orien = length(yaw);
 f_orien = linspace(-fs/2, fs/2 - fs/N_orien, N_orien) + fs/(2*N_orien)*mod(N_orien, 2);
 % plot orientation frequency domain y axis
 figure
+hold on
 plot(f_orien, fftshift(abs(phone_Y(:,1)))); % only look at i component
+PlotMajorFrequency(maxfreq_phone_Y, f_orien,phone_Y(:,1));
+hold off
+xlim([-15 15])
+ylim([0 800])
 xlabel("Frequency(Hz)");
 ylabel("Amplitude");
-title("Phone Y axis i")
+title("Projection of World Y Axis in Phone (i component)")
 
 % identify peak frequency 
 [Z_gyro_sorted,Z_gyro_I] = sort(fftshift(abs(Z_gyro)),'descend');
@@ -183,6 +145,76 @@ maxfreq_phone_Y = abs(f_orien(phone_Y_I(1)));
 maxfreq_phone_Y_mag = phone_Y_sorted(1);
 phone_Y_phase = fftshift(angle(phone_Y(:,1)));
 maxfreq_phone_Y_phase = phone_Y_phase(phone_Y_I(1));
+
+% plot accel frequency domain
+figure
+subplot(3,1,1);
+hold on
+plot(f_accel, fftshift(abs(X_accel)));
+PlotMajorFrequency(maxfreq_phone_Y, f_accel,X_accel);
+hold off
+xlim([-10 10])
+ylim([0 5000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel x")
+
+subplot(3,1,2);
+hold on
+plot(f_accel, fftshift(abs(Y_accel)));
+PlotMajorFrequency(maxfreq_phone_Y, f_accel,Y_accel);
+hold off
+xlim([-10 10])
+ylim([0 5000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel y")
+
+subplot(3,1,3);
+hold on
+plot(f_accel, fftshift(abs(Z_accel)));
+PlotMajorFrequency(maxfreq_phone_Y, f_accel,Z_accel);
+hold off
+xlim([-10 10])
+ylim([0 5000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Accel z")
+
+% plot gyro frequency domain
+figure
+subplot(3,1,1);
+plot(f_gyro, fftshift(abs(X_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, f_gyro,X_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro X")
+
+subplot(3,1,2);
+plot(f_gyro, fftshift(abs(Y_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, f_gyro,Y_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro Y")
+
+subplot(3,1,3);
+plot(f_gyro, fftshift(abs(Z_gyro)));
+hold on
+PlotMajorFrequency(maxfreq_phone_Y, f_gyro,Z_gyro);
+hold off
+xlim([-15 15])
+ylim([0 1000])
+xlabel("Frequency(Hz)");
+ylabel("Amplitude");
+title("Gyro Z")
 
 % bandpass 
 lower_offset = 0.01;
@@ -302,10 +334,10 @@ end
 
 % plot position
 figure
-plot(position_world(:,1),position_world(:,2),'b')
-title("Position of Biker Over Time")
-xlabel("x(m)")
-ylabel("y(m)")
+plot(position_world(:,2),'b')
+title("Y Position of Biker Over Time")
+xlabel("time(0.01 s)")
+ylabel("Y(m)")
 
 
 function res = pitchrot(alpha) % pitch
@@ -329,4 +361,19 @@ function res = rpy_world2local(n, v,orientation)
         axis = [axis; transpose(new_axis)]; 
     end
     res = axis;
+end
+
+function res = PlotMajorFrequency(freq,freqdata, data)
+    idx = freqdata == freq;
+    value_x = [round(-freq,3); round(freq,3)];
+    shifted = fftshift(abs(data));
+    value_y = [round(shifted(idx),3);round(shifted(idx),3)];
+    plot(value_x,value_y,'r.', 'MarkerSize', 20)
+    h = [];
+    for k=1:numel(value_x)
+        h1 = plot(value_x(k),value_y(k),'r.', 'MarkerSize', 20,'DisplayName', ['(' num2str(value_x(k)) ', ' num2str(value_y(k)) ')']);
+        h = [h,h1];
+    end
+    res = h;
+    legend(h)
 end
